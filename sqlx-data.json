@@ -1,0 +1,141 @@
+{
+  "db": "SQLite",
+  "02512b72f6db1df1872faa6588a0709bb4180e4925f9125676c30defbcf84565": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int64"
+        },
+        {
+          "name": "voice_channel",
+          "ordinal": 1,
+          "type_info": "Int64"
+        },
+        {
+          "name": "text_channel",
+          "ordinal": 2,
+          "type_info": "Int64"
+        }
+      ],
+      "nullable": [
+        false,
+        true,
+        true
+      ],
+      "parameters": {
+        "Right": 1
+      }
+    },
+    "query": "SELECT * FROM servers WHERE id = ?"
+  },
+  "2ec1c7b28e4a6b6234559041e571ff93ca9022eaad53fdda81dbff9a619c2ab9": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Right": 2
+      }
+    },
+    "query": "UPDATE servers SET text_channel = ? WHERE id = ?"
+  },
+  "633f57c188242620540ab86a53b2c94e694a8adb900a322bd4883d5edcdbe2a0": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Right": 3
+      }
+    },
+    "query": "UPDATE users SET voice = ? WHERE id = ? AND server_id = ?"
+  },
+  "780bce93eab41f4142d9605e07abd898bddd568c3baae156057f31549dfcea38": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Right": 3
+      }
+    },
+    "query": "INSERT INTO users (id, server_id, voice) VALUES (?, ?, ?)"
+  },
+  "8e4af64301b503651efad9fe05ddeec442e851a539be0c99ac7420ff17f22a60": {
+    "describe": {
+      "columns": [
+        {
+          "name": "text_channel",
+          "ordinal": 0,
+          "type_info": "Int64"
+        }
+      ],
+      "nullable": [
+        true
+      ],
+      "parameters": {
+        "Right": 1
+      }
+    },
+    "query": "SELECT text_channel FROM servers WHERE id = ?"
+  },
+  "a11f33ecfd673c2946e6226a220840accd546af44327ab19cf46e0be7c43d51f": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Right": 1
+      }
+    },
+    "query": "INSERT INTO servers (id) VALUES (?)"
+  },
+  "b0219a17c4922181310c0d85de72a615520964904d75d877fa11506323f79a69": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Right": 2
+      }
+    },
+    "query": "UPDATE servers SET voice_channel = ? WHERE id = ?"
+  },
+  "b967cdcd68ca773647526959ce3a971839f2d80b78a904c3ee81a01d0d8fea89": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int64"
+        },
+        {
+          "name": "server_id",
+          "ordinal": 1,
+          "type_info": "Int64"
+        },
+        {
+          "name": "voice",
+          "ordinal": 2,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        true,
+        true
+      ],
+      "parameters": {
+        "Right": 2
+      }
+    },
+    "query": "SELECT * FROM users WHERE id = ? AND server_id = ?"
+  },
+  "f29b704f0a98d03d4497916a5227b62a19fed3ac3887083ee270ac4f16cea406": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Right": 1
+      }
+    },
+    "query": "INSERT OR IGNORE INTO servers (id) VALUES (?)"
+  }
+}
