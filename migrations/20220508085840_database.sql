@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS servers (
 );
 
 CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY,
+    id INTEGER,
     server_id INTEGER,
     voice TEXT,
 

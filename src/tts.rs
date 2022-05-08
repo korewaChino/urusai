@@ -1,6 +1,6 @@
-use std::collections::HashMap;
-
-use anyhow::{Ok, Result};
+use std::{collections::HashMap};
+use bytes::{Bytes};
+use anyhow::{ Result};
 use reqwest::{Client, Response};
 use serde_json::{Value, json};
 use serde::{Serialize, Deserialize};
@@ -15,7 +15,7 @@ source: ttsmp3
 then get the URL from the json output
 easy */
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug)]
 pub enum TTS {
     TikTok {
         name: String,
@@ -26,28 +26,36 @@ pub enum TTS {
         status_msg: String,
     },
     TTSMP3 {
+        // I'd use Serde to deserialize this, but thing is that the Bytes object below is not serializable
         name: String,
-        #[serde(rename = "Error")]
         error: i32,
-        #[serde(rename = "Speaker")]
         speaker: String,
-        #[serde(rename = "Cached")]
         cached: i32,
         tasktype: String,
-        #[serde(rename = "URL")]
         url: String,
-        #[serde(rename = "MP3")]
         mp3: String,
+    },
+    OmameSAPI { // Uses Omame's SAPI Online API at https://sapi.omame.xyz/api/
+        name: String,
+        // It just returns raw data, so we don't need to parse it.
+        data: Bytes,
     }
 }
 
 
 impl TTS {
-    pub async fn request(lang: &str, text: &str, msg: Option<&Message>) -> Self {
+    pub async fn request(lang: &str, text: &str, msg: Option<&Message>) -> Result<Self, String> {
         let client = Client::new();
         // Name format: server_id-channel_id-user_id
         let name = if let Some(msg) = msg {
-            format!("{}-{}-{}.mp3", msg.guild_id.unwrap().0, msg.channel_id.0, msg.author.id.0)
+            let mut path = std::env::current_dir().unwrap();
+            path.push("tts");
+            let channelid = msg.channel_id.0;
+            let serverid = msg.guild_id.unwrap().0;
+            path.push(&serverid.to_string());
+            path.push(&channelid.to_string());
+            std::fs::create_dir_all(path).unwrap();
+            format!("{}/{}/{}.mp3", msg.guild_id.unwrap().0, msg.channel_id.0, msg.author.id.0)
         } else {
             "test.mp3".to_string()
         };
@@ -64,17 +72,18 @@ impl TTS {
                 .await
                 .unwrap();
             // return a TTS::TikTok
-            TTS::TikTok {
+            let tiktok = TTS::TikTok {
                 name,
                 data: Some(res["data"].clone()),
                 extra: Some(res["extra"].clone()),
                 message: res["message"].as_str().unwrap().to_string(),
                 status_code: res["status_code"].as_i64().unwrap() as i32,
                 status_msg: res["status_msg"].as_str().unwrap().to_string(),
-            }
-        } else {
+            };
+            Ok(tiktok)
+        } else if lang.starts_with("ttsmp3-") {
             // ttsmp3
-
+            let lang = lang.split("-").nth(1).unwrap();
             // urlencoded form data
             let mut params = HashMap::new();
             params.insert("msg", text);
@@ -89,7 +98,11 @@ impl TTS {
                 .json()
                 .await
                 .unwrap();
-            TTS::TTSMP3 {
+            // Check if there is an error
+            if res["Error"].as_i64().unwrap() != 0 {
+                return Err(res["Error"].as_str().unwrap().to_string());
+            }
+            let ttsmp3 = TTS::TTSMP3 {
                 name,
                 error: res["Error"].as_i64().unwrap_or_default() as i32,
                 speaker: res["Speaker"].as_str().unwrap().to_string(),
@@ -97,7 +110,31 @@ impl TTS {
                 tasktype: res["tasktype"].as_str().unwrap().to_string(),
                 url: res["URL"].as_str().unwrap_or_default().to_string(),
                 mp3: res["MP3"].as_str().unwrap_or_default().to_string(),
-            }
+            };
+            Ok(ttsmp3)
+        } else if lang.starts_with("sapi-") {
+            // sapi
+            let lang = lang.split("-").nth(1).unwrap();
+            let param = [("msg", text), ("voice", lang)];
+
+            let res = client
+                .post("https://sapi.omame.xyz/api/")
+                .query(&param)
+                .send()
+                .await
+                .unwrap();
+
+            // This directly returns the data
+            let data = res.bytes().await.unwrap();
+            Ok(
+                TTS::OmameSAPI {
+                    name,
+                    data
+                }
+            )
+
+        } else {
+            Err("Unknown Voice".to_string())
         }
     }
 
@@ -128,7 +165,16 @@ impl TTS {
                 let mut file = tokio::fs::File::create(name.clone()).await.expect("Failed to create file");
                 let mut content =  Cursor::new(response.bytes().await.unwrap());
                 tokio::io::copy(&mut content, &mut file).await.expect("Failed to copy file");
-                // Get the file path
+                Ok(name)
+            }
+
+            TTS::OmameSAPI { name, data, .. } => {
+                // Write the data to a file
+                //let name = name.replace(".mp3", ".wav");
+                let name = format!("tts/{}", name);
+                let mut file = tokio::fs::File::create(name.clone()).await.expect("Failed to create file");
+                let mut content =  Cursor::new(data);
+                tokio::io::copy(&mut content, &mut file).await.expect("Failed to copy file");
                 Ok(name)
             }
 
@@ -163,8 +209,8 @@ mod test_super {
     #[tokio::test]
     async fn test_tiktok() {
         let text = "Hello, world!";
-        let lang = "Justin";
-        let tts = TTS::request(&lang, &text, None).await;
-        tts.download().await;
+        let lang = "ttsmp3-Justin";
+        let tts = TTS::request(&lang, &text, None).await.unwrap();
+        tts.download().await.unwrap();
     }
 }

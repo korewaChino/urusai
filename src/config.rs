@@ -108,7 +108,7 @@ impl User {
             User {
                 ctx: ctx.clone(),
                 msg: msg.clone(),
-                id: user.id,
+                id: user.id.unwrap(),
                 server_id: user.server_id.unwrap(),
                 voice: user.voice.unwrap(),
             }

@@ -71,7 +71,13 @@ impl EventHandler for Handler {
                 } else {
                     println!("{}: {}", msg.author.name, msg.content);
                     let database = User::from_db(&ctx, &msg).await;
-                    let tts_file = TTS::request(&database.voice, &msg.content, Some(&msg)).await.download().await.unwrap();
+                    let tts = TTS::request(&database.voice, &msg.content, Some(&msg)).await;
+                    let tts_file = if tts.is_err() {
+                        msg.reply(&ctx, format!("Could not print message {:?}", tts.err())).await.unwrap();
+                        return
+                    } else {
+                        tts.unwrap().download().await.unwrap()
+                    };
                     // TODO: Put the message in the queue
                     if let Some(handler_lock) = manager.get(guild.id) {
                         let mut handler = handler_lock.lock().await;

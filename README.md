@@ -1,6 +1,6 @@
 # Urusai
 
-Urusai (JP: 煩い / noisy in Japanese) is a Discord Text-to-Speech bot written in Rust that reads text in a specific channel using the private TikTok TTS API and the [ttsmp3.com](https://ttsmp3.com/) API.
+Urusai (JP: 煩い / noisy in Japanese) is a Discord Text-to-Speech bot written in Rust that reads text in a specific channel using the private TikTok TTS API and the [ttsmp3.com](https://ttsmp3.com/) API, and also omame's Remote SAPI Server API.
 
 TTS configuration varies each server per user, per server.
 
