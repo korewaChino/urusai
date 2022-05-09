@@ -118,7 +118,7 @@ impl TTS {
             let param = [("msg", text), ("voice", lang)];
 
             let res = client
-                .post("https://sapi.omame.xyz/api/")
+                .post("https://sapi.omame.xyz/api")
                 .query(&param)
                 .send()
                 .await
