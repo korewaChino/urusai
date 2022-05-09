@@ -5,7 +5,7 @@ version: '3.0'
 
 services:
   urusai:
-    image: korewaChino/urusai:latest
+    image: korewachino/urusai:latest
     build:
       context: .
       dockerfile: Dockerfile
