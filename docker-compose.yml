@@ -10,8 +10,10 @@ services:
       context: .
       dockerfile: Dockerfile
     volumes:
-      - ./tts:/urusai/tts
+      - tts-cache:/urusai/tts
 
     environment:
       - DISCORD_TOKEN=${DISCORD_TOKEN}
       - DATABASE_URL=sqlite:database.db
+volumes:
+  tts-cache:
