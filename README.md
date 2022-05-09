@@ -16,9 +16,7 @@ To use another voice, run `tts!setvoice <voice>`.
 
 # Building
 
-[Install Rust and Cargo](https://www.rust-lang.org/), then install `sqlx-cli`, Opus and FFMPEG.
-
-Then create a .env file or set the environment variable `DATABASE_URL=sqlite:database.db` on compile time. Run `sqlx database create && sqlx migrate run` to generate the database.
+[Install Rust and Cargo](https://www.rust-lang.org/), then install Opus and FFMPEG.
 
 then run `cargo build --release`, or run it directly using `cargo run`.
 
